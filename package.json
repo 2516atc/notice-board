@@ -1,10 +1,20 @@
 {
     "devDependencies": {
+        "@2516atc/ui": "^1.1.0",
         "@babel/core": "^7.17.0",
         "@babel/preset-env": "^7.16.0",
         "@symfony/webpack-encore": "^4.0.0",
+        "@types/node": "^18.13.0",
+        "@vue/tsconfig": "^0.1.3",
         "core-js": "^3.23.0",
         "regenerator-runtime": "^0.13.9",
+        "sass": "^1.58.1",
+        "sass-loader": "^13.2.0",
+        "ts-loader": "^9.4.2",
+        "typescript": "^4.9.5",
+        "vue": "^3.2.47",
+        "vue-loader": "^17.0.1",
+        "vue-template-compiler": "^2.7.14",
         "webpack": "^5.74.0",
         "webpack-cli": "^4.10.0",
         "webpack-notifier": "^1.15.0"

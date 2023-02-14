@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "paths": {
+            "@/*": [ "./assets/*" ],
+        },
+        "types": [
+            "node"
+        ]
+    },
+    "extends": "@vue/tsconfig/tsconfig.web.json"
+}
