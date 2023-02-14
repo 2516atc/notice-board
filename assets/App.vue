@@ -1,12 +1,16 @@
 <template>
     <header>
         <span aria-hidden="true" class="crest"></span>
-        <h1>2516 (Droitwich) Squadron</h1>
+        <h1>{{ store.currentSlide.title ?? '2516 (Droitwich) Squadron' }}</h1>
     </header>
+    <section>
+        <component :is="slideComponent(store.currentSlide.type)" />
+    </section>
 </template>
 
-<script setup>
-
+<script lang="ts" setup>
+    import { slideComponent } from '@/components/mapping';
+    import { store } from './store';
 </script>
 
 <style lang="scss">
@@ -16,6 +20,7 @@
     @import "https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap";
 
     html, body {
+        font-family: arial, sans-serif;
         margin: 0;
         padding: 0;
     }
@@ -55,5 +60,12 @@
                 background-image: url('./images/logo-2516@4x.png');
             }
         }
+    }
+
+    section {
+        flex-grow: 1;
+        font-size: 2rem;
+        overflow-y: hidden;
+        padding: 0 1.5rem;
     }
 </style>
