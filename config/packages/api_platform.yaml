@@ -1,0 +1,7 @@
+api_platform:
+    show_webby: false
+    swagger:
+        api_keys:
+            api_token:
+                name: x-api-token
+                type: header
