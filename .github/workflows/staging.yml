@@ -67,8 +67,11 @@ jobs:
       - name: Dump production variables
         run: 'composer dump-env prod'
 
+      - name: Warm up Doctrine hydrators
+        run: 'php bin/console doctrine:mongodb:generate:hydrators'
+
       - name: Package deploy artifact
-        run: 'zip -r ${{ env.RELEASE_VERSION }}.zip . -x .git/\* .github/\* assets/\* bin/\* node_modules/\* var/\* .env .env.local .gitignore composer.lock package.json package-lock.json symfony.lock tsconfig.json webpack.config.js'
+        run: 'zip -r ${{ env.RELEASE_VERSION }}.zip . -x .git/\* .github/\* assets/\* bin/\* node_modules/\* .env .env.local .gitignore composer.lock package.json package-lock.json symfony.lock tsconfig.json webpack.config.js'
 
       - name: Connect to VPN
         uses: kota65535/github-openvpn-connect-action@v2
