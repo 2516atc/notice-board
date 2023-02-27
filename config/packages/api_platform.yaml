@@ -5,3 +5,4 @@ api_platform:
             api_token:
                 name: x-api-token
                 type: header
+    version: '%env(resolve:VERSION)%'

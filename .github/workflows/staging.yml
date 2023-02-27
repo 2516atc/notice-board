@@ -1,0 +1,93 @@
+name: Build and publish site to staging environment
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: prod
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Checkout deploy actions
+        uses: actions/checkout@v3
+        with:
+          repository: 2516atc/deploy-actions
+          token: ${{ secrets.ACCESS_TOKEN }}
+          path: .github/actions/deploy-actions
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install OpenVPN
+        run: |
+          sudo apt update
+          sudo apt install -y openvpn openvpn-systemd-resolved
+          
+      - name: Set tag variable
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Create and populate .env.local file
+        env:
+          APP_SECRET: ${{ secrets.APP_SECRET }}
+          CORS_ALLOW_ORIGIN: ${{ secrets.CORS_ALLOW_ORIGIN }}
+          MONGODB_DB: ${{ secrets.MONGODB_DB }}
+          MONGODB_URL: ${{ secrets.MONGODB_URL }}
+        run: |
+          touch .env.local
+          echo APP_ENV="$APP_ENV" >> .env.local
+          echo APP_SECRET="$APP_SECRET" >> .env.local
+          echo CORS_ALLOW_ORIGIN="$CORS_ALLOW_ORIGIN" >> .env.local
+          echo MONGODB_DB="$MONGODB_DB" >> .env.local
+          echo MONGODB_URL="$MONGODB_URL" >> .env.local
+          echo VERSION="$RELEASE_VERSION" >> .env.local
+        shell: bash
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install Composer dependencies
+        run: 'composer install --no-dev'
+
+      - name: Build static files
+        run: npm run build
+
+      - name: Dump production variables
+        run: 'composer dump-env prod'
+
+      - name: Package deploy artifact
+        run: 'zip -r ${{ env.RELEASE_VERSION }}.zip . -x .git/\* .github/\* assets/\* bin/\* node_modules/\* var/\* .env .env.local .gitignore composer.lock package.json package-lock.json symfony.lock tsconfig.json webpack.config.js'
+
+      - name: Connect to VPN
+        uses: kota65535/github-openvpn-connect-action@v2
+        with:
+          config_file: ./.github/actions/deploy-actions/github-actions.ovpn
+          client_key: ${{ secrets.OVPN_CLIENT_KEY }}
+
+      - name: Upload packaged artifact
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          source: '${{ env.RELEASE_VERSION }}.zip'
+          target: '~/artifacts/notice-board'
+
+      - name: Deploy published artifact
+        uses: distributhor/workflow-webhook@v3
+        env:
+          webhook_url: '${{ secrets.WEBHOOK_URL }}'
+          data: '{ "environment": "staging", "version": "${{ env.RELEASE_VERSION }}" }'

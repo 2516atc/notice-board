@@ -1,0 +1,20 @@
+name: Publish site to production environment
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: prod
+    steps:
+      - name: Set tag variable
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Update production version
+        uses: distributhor/workflow-webhook@v3
+        env:
+          webhook_url: '${{ secrets.WEBHOOK_URL }}'
+          data: '{ "environment": "prod", "version": "${{ env.RELEASE_VERSION }}" }'
