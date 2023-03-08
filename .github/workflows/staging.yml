@@ -43,6 +43,9 @@ jobs:
         env:
           APP_SECRET: ${{ secrets.APP_SECRET }}
           CORS_ALLOW_ORIGIN: ${{ secrets.CORS_ALLOW_ORIGIN }}
+          MERCURE_JWT_SECRET: ${{ secrets.MERCURE_JWT_SECRET }}
+          MERCURE_PUBLIC_URL: ${{ secrets.MERCURE_PUBLIC_URL }}
+          MERCURE_URL: ${{ secrets.MERCURE_URL }}
           MONGODB_DB: ${{ secrets.MONGODB_DB }}
           MONGODB_URL: ${{ secrets.MONGODB_URL }}
         run: |
@@ -50,6 +53,9 @@ jobs:
           echo APP_ENV="$APP_ENV" >> .env.local
           echo APP_SECRET="$APP_SECRET" >> .env.local
           echo CORS_ALLOW_ORIGIN="$CORS_ALLOW_ORIGIN" >> .env.local
+          echo MERCURE_JWT_SECRET="$MERCURE_JWT_SECRET" >> .env.local
+          echo MERCURE_PUBLIC_URL="$MERCURE_PUBLIC_URL" >> .env.local
+          echo MERCURE_URL="$MERCURE_URL" >> .env.local
           echo MONGODB_DB="$MONGODB_DB" >> .env.local
           echo MONGODB_URL="$MONGODB_URL" >> .env.local
           echo VERSION="$RELEASE_VERSION" >> .env.local

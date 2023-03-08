@@ -12,6 +12,10 @@
     {% endblock %}
 
     {% block javascripts %}
+        <script>
+            window.mercureHub = '{{ mercure(url('_api_slides_get_collection'), { subscribe: url('_api_slides_get_collection') }) | escape('js') }}';
+        </script>
+
         {{ encore_entry_script_tags('app') }}
     {% endblock %}
 </head>
