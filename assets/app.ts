@@ -1,5 +1,5 @@
 import App from '@/App.vue';
-import { getSlides } from '@/helpers/api';
+import { getSlides, subscribeToEvents } from '@/helpers/api';
 import { store } from '@/store';
 import { createApp } from 'vue';
 
@@ -11,6 +11,10 @@ async function startApp(): Promise<void>
 {
     store.slides = await getSlides();
     store.currentSlide = store.slides[0];
+
+    subscribeToEvents(async () => {
+        store.slides = await getSlides();
+    });
 
     setInterval(() => {
         const length = store.slides.length;

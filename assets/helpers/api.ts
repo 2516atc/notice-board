@@ -28,4 +28,16 @@ async function getSlides(): Promise<Slide[]>
     );
 }
 
-export { getSlides };
+function subscribeToEvents(handler: (event: MessageEvent) => void): void
+{
+    const eventSource = new EventSource(
+        window.mercureHub,
+        {
+            withCredentials: true
+        }
+    );
+
+    eventSource.onmessage = handler;
+}
+
+export { getSlides, subscribeToEvents };
