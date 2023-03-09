@@ -37,6 +37,12 @@ function subscribeToEvents(handler: (event: MessageEvent) => void): void
         }
     );
 
+    eventSource.onopen = () => {
+        eventSource.onerror = () => {
+            window.refreshPage = true;
+        }
+    }
+
     eventSource.onmessage = handler;
 }
 
