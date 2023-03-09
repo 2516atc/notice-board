@@ -17,6 +17,12 @@ async function startApp(): Promise<void>
     });
 
     setInterval(() => {
+        if (window.refreshPage)
+        {
+            location.reload();
+            return;
+        }
+
         const length = store.slides.length;
 
         if (length < 1)
