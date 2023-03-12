@@ -8,17 +8,23 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\State\ProcessorInterface;
 use App\ApiResource\AuthorisationRequest;
 use App\Document\ApiToken;
+use App\Mercure\Mercure;
 use DateInterval;
 use DateTime;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ODM\MongoDB\MongoDBException;
 use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\Mercure\HubInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
 readonly class AuthorisationRequestProcessor implements ProcessorInterface
 {
-    public function __construct(private CacheInterface $cache, private DocumentManager $documentManager) { }
+    public function __construct(
+        private CacheInterface $cache,
+        private DocumentManager $documentManager,
+        private Mercure $mercure
+    ) { }
 
     /**
      * @inheritDoc
@@ -53,6 +59,15 @@ readonly class AuthorisationRequestProcessor implements ProcessorInterface
             }
 
             $this->cache->delete(AuthorisationRequest::CACHE_PREFIX . $data->code);
+
+            $this->mercure->publish(
+                $this->mercure->generateTopic(
+                    '_api_/authorisation-requests/{code}{._format}_get',
+                    [ 'code' => '{code}' ]
+                ),
+                $data->approved ? 'auth_approved' : 'auth_rejected',
+                [ 'code' => $data->code ]
+            );
         }
 
         return $data;

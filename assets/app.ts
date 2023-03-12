@@ -12,8 +12,10 @@ async function startApp(): Promise<void>
     store.slides = await getSlides();
     store.currentSlide = store.slides[0];
 
-    subscribeToEvents(async () => {
-        store.slides = await getSlides();
+    subscribeToEvents({
+        'slide_.+': async () => {
+            store.slides = await getSlides();
+        }
     });
 
     setInterval(() => {
