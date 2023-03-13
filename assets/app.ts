@@ -1,5 +1,5 @@
 import App from '@/App.vue';
-import { getSlides, subscribeToEvents } from '@/helpers/api';
+import { getSlides, requestAuthorisation, subscribeToEvents } from '@/helpers/api';
 import { store } from '@/store';
 import { createApp } from 'vue';
 
@@ -9,11 +9,41 @@ app.mount('#app');
 
 async function startApp(): Promise<void>
 {
-    store.slides = await getSlides();
-    store.currentSlide = store.slides[0];
-
-    subscribeToEvents(async () => {
+    try
+    {
         store.slides = await getSlides();
+        store.currentSlide = store.slides[0];
+    }
+    catch (exception)
+    {
+        if (!(exception instanceof Error) || exception.message !== 'Unauthorised')
+            throw exception;
+
+        const authorisationRequest = await requestAuthorisation();
+
+        if (authorisationRequest.approved)
+        {
+            store.slides = await getSlides();
+            store.currentSlide = store.slides[0];
+        }
+        else
+        {
+            store.authorisationRequestCode = authorisationRequest.code;
+
+            setTimeout(
+                () => location.reload(),
+                authorisationRequest.expires.getTime() - Date.now()
+            )
+        }
+    }
+
+    subscribeToEvents({
+        'slide_.+': async () => {
+            store.slides = await getSlides();
+        },
+        'auth_.+': () => {
+            location.reload();
+        }
     });
 
     setInterval(() => {

@@ -13,7 +13,12 @@
 
     {% block javascripts %}
         <script>
-            window.mercureHub = '{{ mercure(url('_api_slides_get_collection'), { subscribe: url('_api_slides_get_collection') }) | escape('js') }}';
+            {% set topics = [
+                url('_api_slides_get_collection'),
+                url('_api_/authorisation-requests/{code}{._format}_get', { code: '{code}' })
+            ] %}
+
+            window.mercureHub = '{{ mercure(topics, { subscribe: topics }) | escape('js') }}';
         </script>
 
         {{ encore_entry_script_tags('app') }}

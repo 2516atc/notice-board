@@ -2,16 +2,14 @@
 
 namespace App\EventSubscriber;
 
-use ApiPlatform\Api\UrlGeneratorInterface;
+use App\Mercure\Mercure;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ODM\MongoDB\Event\LifecycleEventArgs;
 use Doctrine\ODM\MongoDB\Events;
-use Symfony\Component\Mercure\HubInterface;
-use Symfony\Component\Mercure\Update;
 
 readonly class SlideUpdateSubscriber implements EventSubscriber
 {
-    public function __construct(private HubInterface $hub, private UrlGeneratorInterface $router, private bool $private) { }
+    public function __construct(private Mercure $mercure) { }
 
     public function getSubscribedEvents(): array
     {
@@ -39,14 +37,9 @@ readonly class SlideUpdateSubscriber implements EventSubscriber
 
     private function fireSlideUpdatedEvent(string $event): void
     {
-        $topic = $this->router->generate('_api_slides_get_collection', referenceType: UrlGeneratorInterface::ABS_URL);
-
-        $this->hub->publish(
-            new Update(
-                $topic,
-                $event,
-                $this->private
-            )
+        $this->mercure->publish(
+            $this->mercure->generateTopic('_api_slides_get_collection'),
+            $event
         );
     }
 }

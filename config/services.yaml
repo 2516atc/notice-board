@@ -25,10 +25,12 @@ services:
     # please note that last definitions always *replace* previous ones
 
     App\EventSubscriber\SlideUpdateSubscriber:
-        arguments:
-            $private: '%app.mercure.private%'
         tags:
             - { name: 'doctrine_mongodb.odm.event_subscriber' }
+
+    App\Mercure\Mercure:
+        arguments:
+            $privateEvents: '%app.mercure.private%'
 
 when@prod:
     parameters:

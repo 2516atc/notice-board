@@ -12,10 +12,11 @@ class ApiToken implements UserInterface
     private string $id;
 
     #[MongoDB\Field]
+    #[MongoDB\UniqueIndex]
     private string $token;
 
-    #[MongoDB\Field]
-    private array $roles = [];
+    #[MongoDB\Field(type: 'collection')]
+    private ?array $roles = null;
 
     public function getId(): string
     {
@@ -29,7 +30,7 @@ class ApiToken implements UserInterface
 
     public function getRoles(): array
     {
-        $roles = $this->roles;
+        $roles = $this->roles ?? [];
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
@@ -38,7 +39,16 @@ class ApiToken implements UserInterface
 
     public function setRoles(array $roles): self
     {
-        $this->roles = $roles;
+        $this->roles = empty($roles) ?
+            null :
+            $roles;
+
+        return $this;
+    }
+
+    public function setToken(string $token): self
+    {
+        $this->token = $token;
 
         return $this;
     }
