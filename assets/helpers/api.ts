@@ -6,9 +6,25 @@ interface Event
     event: string;
 }
 
-async function getApiToken(): Promise<string>
+interface RawAuthorisationRequest
+{
+    approved: boolean;
+    code: string;
+    expires: string | Date;
+}
+
+interface AuthorisationRequest extends RawAuthorisationRequest
+{
+    expires: Date;
+}
+
+async function getApiToken(): Promise<string|null>
 {
     const seed = window.location.hash.substring(1);
+
+    if (!seed)
+        return null;
+
     const hashBuffer = await crypto.subtle.digest(
         'SHA-256',
         new TextEncoder().encode(seed)
@@ -24,14 +40,51 @@ async function getSlides(): Promise<Slide[]>
 {
     const apiToken = await getApiToken();
 
+    if (!apiToken)
+        throw new Error('No API token');
+
     return fetch('/api/slides', {
         headers: {
             'accept': 'application/json',
             'x-api-token': apiToken
         }
     }).then(
-        (data) => data.json()
+        (response) => {
+            if (response.status === 401)
+                throw new Error('Unauthorised');
+
+            return response.json();
+        }
     );
+}
+
+async function requestAuthorisation(): Promise<AuthorisationRequest>
+{
+    const apiToken = await getApiToken();
+
+    if (!apiToken)
+        throw new Error('No API token');
+
+    const authorisationRequest: RawAuthorisationRequest = await fetch(
+        '/api/authorisation-requests',
+        {
+            body: JSON.stringify({
+                apiToken
+            }),
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: 'POST'
+        }
+    ).then(
+        (response) => response.json()
+    );
+
+    return {
+        ...authorisationRequest,
+        expires: new Date(authorisationRequest.expires)
+    };
 }
 
 function subscribeToEvents(handlers: { [pattern: string]: (event: MessageEvent) => void }): void
@@ -60,4 +113,4 @@ function subscribeToEvents(handlers: { [pattern: string]: (event: MessageEvent) 
     };
 }
 
-export { getSlides, subscribeToEvents };
+export { getSlides, requestAuthorisation, subscribeToEvents };

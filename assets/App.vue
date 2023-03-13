@@ -4,11 +4,13 @@
         <h1>{{ store.currentSlide.title ?? '2516 (Droitwich) Squadron' }}</h1>
     </header>
     <section>
-        <component :is="slideComponent(store.currentSlide.type)" />
+        <component v-if="store.currentSlide" :is="slideComponent(store.currentSlide.type)" />
+        <AuthorisationRequest v-if="store.authorisationRequestCode" />
     </section>
 </template>
 
 <script lang="ts" setup>
+    import AuthorisationRequest from '@/components/authorisationRequest.vue';
     import { slideComponent } from '@/components/mapping';
     import { store } from './store';
 </script>
