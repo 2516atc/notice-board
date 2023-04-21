@@ -19,7 +19,7 @@
     });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
     p.code {
         font-size: 2em;
 
